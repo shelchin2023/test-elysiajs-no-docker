@@ -54,18 +54,18 @@ jobs:
             ln -sfn ${{ github.repository }}-${{ github.sha }}-${{ github.run_id }} test-elysiajs-no-docker
               
             # create a service file if it doesn't exist
-            if [ ! -f /etc/systemd/system/test-elysiajs-no-docker.service ]; then
+                if [ ! -f /etc/systemd/system/test-elysiajs-no-docker.service ]; then
                 echo "Creating service file..."
                 cat <<EOT > /etc/systemd/system/test-elysiajs-no-docker.service
-                [Unit]
-                Description=test-elysiajs-no-docker
+            [Unit]
+            Description=test-elysiajs-no-docker
 
-                [Service]
-                ExecStart=bun run ~/deployments/test-elysiajs-no-docker/dist/index.js
+            [Service]
+            ExecStart=/root/.bun/bin/bun run ~/deployments/test-elysiajs-no-docker/dist/index.js
 
-                [Install]
-                WantedBy=multi-user.target
-                EOT
+            [Install]
+            WantedBy=multi-user.target
+            EOT
                 echo "Service file created."
             else
                 echo "Service file already exists."
