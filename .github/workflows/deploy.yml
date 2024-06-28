@@ -52,27 +52,27 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/deployments
-            ln -sfn ${{ github.repository }}-${{ github.sha }}-${{ github.run_id }} $app
+            ln -sfn ${{ github.repository }}-${{ github.sha }}-${{ github.run_id }} ${{ env.app }}
               
             # create a service file if it doesn't exist
-                if [ ! -f /etc/systemd/system/$app.service ]; then
+                if [ ! -f /etc/systemd/system/${{ env.app }}.service ]; then
                 echo "Creating service file..."
-                cat <<EOT > /etc/systemd/system/$app.service
+                cat <<EOT > /etc/systemd/system/${{ env.app }}.service
             [Unit]
-            Description=$app
+            Description=${{ env.app }}
 
             [Service]
-            ExecStart=/root/.bun/bin/bun run /root/deployments/$app/dist/index.js
+            ExecStart=/root/.bun/bin/bun run /root/deployments/${{ env.app }}/dist/index.js
 
             [Install]
             WantedBy=multi-user.target
             EOT
                 echo "Service file created."
                 systemctl daemon-reload
-                systemctl start $app.service
-                systemctl enable $app.service
+                systemctl start ${{ env.app }}.service
+                systemctl enable ${{ env.app }}.service
             else
                 echo "Service file already exists."
             fi
 
-            sudo systemctl restart $app.service
+            sudo systemctl restart ${{ env.app }}.service
