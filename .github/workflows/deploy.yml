@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-
+env:
+    app: test-elysiajs-no-docker
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -51,24 +52,27 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/deployments
-            ln -sfn ${{ github.repository }}-${{ github.sha }}-${{ github.run_id }} test-elysiajs-no-docker
+            ln -sfn ${{ github.repository }}-${{ github.sha }}-${{ github.run_id }} $app
               
             # create a service file if it doesn't exist
-                if [ ! -f /etc/systemd/system/test-elysiajs-no-docker.service ]; then
+                if [ ! -f /etc/systemd/system/$app.service ]; then
                 echo "Creating service file..."
-                cat <<EOT > /etc/systemd/system/test-elysiajs-no-docker.service
+                cat <<EOT > /etc/systemd/system/$app.service
             [Unit]
-            Description=test-elysiajs-no-docker
+            Description=$app
 
             [Service]
-            ExecStart=/root/.bun/bin/bun run ~/deployments/test-elysiajs-no-docker/dist/index.js
+            ExecStart=/root/.bun/bin/bun run /root/deployments/$app/dist/index.js
 
             [Install]
             WantedBy=multi-user.target
             EOT
                 echo "Service file created."
+                systemctl daemon-reload
+                systemctl start $app.service
+                systemctl enable $app.service
             else
                 echo "Service file already exists."
             fi
 
-            sudo systemctl restart test-elysiajs-no-docker.service
+            sudo systemctl restart $app.service
